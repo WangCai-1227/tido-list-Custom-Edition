@@ -84,17 +84,17 @@
 
 ### Todo列表
 
-![设置界面](D:\Desktop\Hou\sticky-notes\设置界面.PNG)
+![设置界面](设置界面.PNG)
 
-![主界面](D:\Desktop\Hou\sticky-notes\主界面.PNG)
+![主界面](主界面.PNG)
 
 ### Done列表
 
-![done](D:\Desktop\Hou\sticky-notes\done.PNG)
+![done](done.PNG)
 
 ### 设置面板
 
-![设置界面](D:\Desktop\Hou\sticky-notes\线宽和子项目编号设置.PNG)
+![设置界面](线宽和子项目编号设置.PNG)
 
 ---
 
