@@ -8,12 +8,13 @@
 <h1 align="center">todo-list · 旺财定制版</h1>
 
 <p align="center">
-  <strong>深度定制的 Electron 桌面待办应用 —— 多级子项目 · 智能搜索 · 跨路由撤销 · 层级独立配置</strong>
+  <strong>定制的 Electron 桌面待办应用 —— 多级子项目 · 智能搜索 · 跨路由撤销 · 层级独立配置</strong>
 </p>
 
 <p align="center">
-  <sub>基于 <a href="https://github.com/xiajingren/xhznl-todo-list">xhznl-todo-list</a> by <a href="https://github.com/xiajingren">@xiajingren</a> 深度定制开发</sub>
+  <sub>基于 <a href="https://github.com/xiajingren/xhznl-todo-list">xhznl-todo-list</a> by <a href="https://github.com/xiajingren">@xiajingren</a> 定制开发</sub>
 </p>
+
 
 <p align="center">
   <sub>定制开发者：<a href="https://github.com/WangCai-1227">@WangCai-1227</a></sub>
@@ -87,7 +88,7 @@
 
 ### Todo列表
 
-![设置界面](设置界面.PNG)
+
 
 ![主界面](主界面.PNG)
 
@@ -96,6 +97,10 @@
 ![done](done.PNG)
 
 ### 设置面板
+
+![](设置1.PNG)
+
+![](设置界面.PNG)
 
 ![线宽和子项目编号设置](线宽和子项目编号设置.PNG)
 
@@ -472,7 +477,7 @@ dist_electron/
 
 ### v1.0.0
 
-> 首个定制版本，基于 [xhznl-todo-list](https://github.com/xiajingren/xhznl-todo-list) 深度定制
+> 首个定制版本，基于 [xhznl-todo-list](https://github.com/xiajingren/xhznl-todo-list) 定制
 
 **新增功能**
 
