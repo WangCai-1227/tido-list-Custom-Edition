@@ -340,60 +340,14 @@ export default {
           }
         }
 
-        const items = [];
-        const collect = node => {
-          items.push({
-            done_date: node.done_date,
-            done_datetime: node.done_datetime,
-            todo_date: node.todo_date,
-            todo_datetime: node.todo_datetime,
-            content: node.content,
-            id: node.id,
-            priority: node.priority != null ? node.priority : null,
-            color: node.color != null ? node.color : null,
-            children: Array.isArray(node.children) ? node.children : [],
-            isChildDone: !!node.isChildDone,
-            childDoneColor: node.childDoneColor || null
-          });
-          if (node.children && node.children.length) {
-            node.children.forEach(child => collect(child));
-          }
-        };
-        collect(action.item);
-
-        for (const item of items) {
-          DB.insert("doneList", item);
-        }
-
+        const restored = DB.deepClone(action.item);
+        DB.insert("doneList", restored);
         this.getDoneList();
       }
 
       if (action.type === "remove") {
-        const items = [];
-        const collect = node => {
-          items.push({
-            done_date: node.done_date,
-            done_datetime: node.done_datetime,
-            todo_date: node.todo_date,
-            todo_datetime: node.todo_datetime,
-            content: node.content,
-            id: node.id,
-            priority: node.priority != null ? node.priority : null,
-            color: node.color != null ? node.color : null,
-            children: node.children || [],
-            isChildDone: !!node.isChildDone,
-            childDoneColor: node.childDoneColor || null
-          });
-          if (node.children && node.children.length) {
-            node.children.forEach(child => collect(child));
-          }
-        };
-        collect(action.item);
-
-        for (const item of items) {
-          DB.insert("doneList", item);
-        }
-
+        const restored = DB.deepClone(action.item);
+        DB.insert("doneList", restored);
         this.getDoneList();
       }
     },

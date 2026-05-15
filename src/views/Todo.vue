@@ -1,48 +1,159 @@
 <template>
-  <div class="root" @click="add">
-    <div class="search-bar" v-if="showSearch" @click.stop>
-      <i class="iconfont icon-browse search-icon"></i>
-      <input
-        v-model="searchQuery"
-        v-focus
-        placeholder="搜索待办事项..."
-        @click.stop
-        @keyup.esc="searchQuery = ''"
-        spellcheck="false"
-      />
-      <i
-        v-if="searchQuery"
-        class="iconfont icon-close clear-icon"
-        @click.stop="searchQuery = ''"
-      ></i>
-    </div>
-    <div v-if="searchQuery && !searchList.length" class="no-result">
-      无匹配结果
-    </div>
-    <draggable
-      v-if="!searchQuery"
-      class="list"
-      v-model="dragList"
-      v-bind="dragOptions"
-      @start="onDragStart"
-      @end="onDragEnd"
-      :disabled="!!editId"
-    >
-      <transition-group type="transition" :name="!drag ? 'flip-list' : null">
+  <div class="todo-wrapper">
+    <div class="root" @click="add">
+      <div class="search-bar" v-if="showSearch" @click.stop>
+        <i class="iconfont icon-browse search-icon"></i>
+        <input
+          v-model="searchQuery"
+          v-focus
+          placeholder="搜索待办事项..."
+          @click.stop
+          @keyup.esc="searchQuery = ''"
+          spellcheck="false"
+        />
+        <i
+          v-if="searchQuery"
+          class="iconfont icon-close clear-icon"
+          @click.stop="searchQuery = ''"
+        ></i>
+      </div>
+      <div v-if="searchQuery && !searchList.length" class="no-result">
+        无匹配结果
+      </div>
+      <draggable
+        v-if="!searchQuery"
+        class="list"
+        v-model="dragList"
+        v-bind="dragOptions"
+        @start="onDragStart"
+        @end="onDragEnd"
+        :disabled="!!editId"
+      >
+        <transition-group type="transition" :name="!drag ? 'flip-list' : null">
+          <div
+            class="item"
+            :class="{ 'is-child': entry._depth > 0 }"
+            v-for="entry in dragList"
+            :key="entry.item.id"
+            :data-item-id="entry.item.id"
+            :style="[itemTextStyle(entry.item), childItemStyle(entry)]"
+            @dblclick.stop="done($event, entry.item)"
+            @click.stop="editing(entry.item)"
+          >
+            <div
+              class="item-body"
+              :class="{ 'done-child': entry.item.isChildDone }"
+              :style="itemBodyStyle(entry)"
+            >
+              <span class="number" :style="numberSpanStyle(entry)">{{
+                getNumber(entry)
+              }}</span>
+              <p
+                v-if="!isEditing(entry.item)"
+                v-html="highlight(entry.item.content)"
+              ></p>
+              <div v-else class="edit" @click.stop>
+                <input
+                  v-model="entry.item.content"
+                  v-focus
+                  @click.stop="return false;"
+                  @keyup.27="cancel"
+                  @keyup.13="edited"
+                  spellcheck="false"
+                  :style="itemTextStyle(entry.item)"
+                />
+                <div class="edit-tools">
+                  <div class="color-editor color-popover">
+                    <button
+                      class="color-trigger"
+                      :style="colorTriggerStyle(entry.item)"
+                      @click.stop="toggleColorPicker(entry.item)"
+                    ></button>
+                    <div
+                      v-if="colorPickerId === entry.item.id"
+                      class="color-menu color-popover"
+                      @click.stop
+                    >
+                      <button
+                        v-for="color in colorOptions"
+                        :key="color"
+                        class="color-option"
+                        :style="{ backgroundColor: color }"
+                        @click.stop="applyColor(entry.item, color)"
+                      ></button>
+                      <button
+                        class="color-clear"
+                        @click.stop="applyColor(entry.item, colorNoneValue)"
+                      >
+                        无
+                      </button>
+                    </div>
+                  </div>
+                  <div class="priority-editor priority-popover">
+                    <button
+                      class="tool-button priority-button"
+                      :style="priorityButtonStyle(entry.item)"
+                      @click.stop="togglePriorityPicker(entry.item)"
+                    >
+                      {{ priorityButtonText(entry.item) }}
+                    </button>
+                    <div
+                      v-if="priorityPickerId === entry.item.id"
+                      class="priority-menu priority-popover"
+                      @click.stop
+                    >
+                      <button
+                        v-for="option in priorityOptions"
+                        :key="option.label"
+                        class="priority-option"
+                        :class="{
+                          active: (entry.item.priority || null) === option.value
+                        }"
+                        :style="{
+                          color: option.color || 'rgba(255,255,255,0.78)'
+                        }"
+                        @click.stop="applyPriority(entry.item, option.value)"
+                      >
+                        {{ option.label }}
+                      </button>
+                    </div>
+                  </div>
+                  <i
+                    class="iconfont icon-add"
+                    @click.stop="addChild(entry.item)"
+                    title="添加子项目"
+                  ></i>
+                  <i class="iconfont icon-select" @click.stop="edited"></i>
+                  <i
+                    class="iconfont icon-close"
+                    @click.stop="remove(entry.item)"
+                  ></i>
+                </div>
+              </div>
+            </div>
+            <span
+              v-if="hasChildren(entry.item)"
+              class="collapse-toggle"
+              @click.stop="toggleCollapse(entry.item)"
+              >{{ entry.item.collapsed ? "▶" : "▼" }}</span
+            >
+            <span
+              v-if="!hasChildren(entry.item) && entry._depth > 0"
+              class="collapse-spacer"
+            ></span>
+          </div>
+        </transition-group>
+      </draggable>
+      <div v-else class="list">
         <div
           class="item"
           :class="{ 'is-child': entry._depth > 0 }"
-          v-for="entry in dragList"
+          v-for="entry in searchList"
           :key="entry.item.id"
-          :data-item-id="entry.item.id"
           :style="[itemTextStyle(entry.item), childItemStyle(entry)]"
           @dblclick.stop="done($event, entry.item)"
           @click.stop="editing(entry.item)"
         >
-          <span
-            v-if="hasChildren(entry.item) && entry._depth > 0"
-            class="child-collapse-spacer"
-          ></span>
           <div
             class="item-body"
             :class="{ 'done-child': entry.item.isChildDone }"
@@ -140,120 +251,19 @@
             @click.stop="toggleCollapse(entry.item)"
             >{{ entry.item.collapsed ? "▶" : "▼" }}</span
           >
+          <span
+            v-if="!hasChildren(entry.item) && entry._depth > 0"
+            class="collapse-spacer"
+          ></span>
         </div>
-      </transition-group>
-    </draggable>
-    <div v-else class="list">
-      <div
-        class="item"
-        :class="{ 'is-child': entry._depth > 0 }"
-        v-for="entry in searchList"
-        :key="entry.item.id"
-        :style="[itemTextStyle(entry.item), childItemStyle(entry)]"
-        @dblclick.stop="done($event, entry.item)"
-        @click.stop="editing(entry.item)"
-      >
-        <span
-          v-if="hasChildren(entry.item) && entry._depth > 0"
-          class="child-collapse-spacer"
-        ></span>
-        <div
-          class="item-body"
-          :class="{ 'done-child': entry.item.isChildDone }"
-          :style="itemBodyStyle(entry)"
-        >
-          <span class="number" :style="numberSpanStyle(entry)">{{
-            getNumber(entry)
-          }}</span>
-          <p
-            v-if="!isEditing(entry.item)"
-            v-html="highlight(entry.item.content)"
-          ></p>
-          <div v-else class="edit" @click.stop>
-            <input
-              v-model="entry.item.content"
-              v-focus
-              @click.stop="return false;"
-              @keyup.27="cancel"
-              @keyup.13="edited"
-              spellcheck="false"
-              :style="itemTextStyle(entry.item)"
-            />
-            <div class="edit-tools">
-              <div class="color-editor color-popover">
-                <button
-                  class="color-trigger"
-                  :style="colorTriggerStyle(entry.item)"
-                  @click.stop="toggleColorPicker(entry.item)"
-                ></button>
-                <div
-                  v-if="colorPickerId === entry.item.id"
-                  class="color-menu color-popover"
-                  @click.stop
-                >
-                  <button
-                    v-for="color in colorOptions"
-                    :key="color"
-                    class="color-option"
-                    :style="{ backgroundColor: color }"
-                    @click.stop="applyColor(entry.item, color)"
-                  ></button>
-                  <button
-                    class="color-clear"
-                    @click.stop="applyColor(entry.item, colorNoneValue)"
-                  >
-                    无
-                  </button>
-                </div>
-              </div>
-              <div class="priority-editor priority-popover">
-                <button
-                  class="tool-button priority-button"
-                  :style="priorityButtonStyle(entry.item)"
-                  @click.stop="togglePriorityPicker(entry.item)"
-                >
-                  {{ priorityButtonText(entry.item) }}
-                </button>
-                <div
-                  v-if="priorityPickerId === entry.item.id"
-                  class="priority-menu priority-popover"
-                  @click.stop
-                >
-                  <button
-                    v-for="option in priorityOptions"
-                    :key="option.label"
-                    class="priority-option"
-                    :class="{
-                      active: (entry.item.priority || null) === option.value
-                    }"
-                    :style="{ color: option.color || 'rgba(255,255,255,0.78)' }"
-                    @click.stop="applyPriority(entry.item, option.value)"
-                  >
-                    {{ option.label }}
-                  </button>
-                </div>
-              </div>
-              <i
-                class="iconfont icon-add"
-                @click.stop="addChild(entry.item)"
-                title="添加子项目"
-              ></i>
-              <i class="iconfont icon-select" @click.stop="edited"></i>
-              <i
-                class="iconfont icon-close"
-                @click.stop="remove(entry.item)"
-              ></i>
-            </div>
-          </div>
-        </div>
-        <span
-          v-if="hasChildren(entry.item)"
-          class="collapse-toggle"
-          @click.stop="toggleCollapse(entry.item)"
-          >{{ entry.item.collapsed ? "▶" : "▼" }}</span
-        >
       </div>
     </div>
+    <transition name="toast-fade">
+      <div v-if="toastVisible" class="toast">
+        <span class="toast-icon">&#x26A0;</span>
+        <span class="toast-msg">{{ toastMessage }}</span>
+      </div>
+    </transition>
   </div>
 </template>
 <script>
@@ -304,6 +314,7 @@ export default {
       todoList: null,
       dragList: [],
       drag: false,
+      dragUndoSnapshot: null,
       editId: "",
       tempItem: null,
       dblclick: false,
@@ -315,7 +326,10 @@ export default {
       colorNoneValue: COLOR_NONE,
       colorOptions: COLOR_OPTIONS,
       docClickBound: null,
-      searchRestoreCollapsed: {}
+      searchRestoreCollapsed: {},
+      toastMessage: "",
+      toastVisible: false,
+      toastTimer: null
     };
   },
   watch: {
@@ -334,6 +348,7 @@ export default {
       this.todoList = Array.isArray(list) ? list : [];
       this.ensureItemReactive(this.todoList);
       this.deduplicateTree(this.todoList);
+      this.sortChildrenRecursive(this.todoList);
       const flat = this.flattenTree(this.sortedTodoList);
       this.dragList = flat;
     },
@@ -373,12 +388,14 @@ export default {
     syncDragList() {
       if (!this.todoList) return;
       if (this.searchQuery) return;
+      this.sortChildrenRecursive(this.todoList);
       const source = this.sortedTodoList;
       const next = this.flattenTree(source);
       this.dragList = next;
     },
     onDragStart() {
       this.drag = true;
+      this.dragUndoSnapshot = DB.deepClone(this.todoList);
     },
     recalculateDepths(flat) {
       if (!flat || !flat.length) return;
@@ -392,10 +409,38 @@ export default {
         if (entry._depth < 0) entry._depth = 0;
       }
     },
+    hasPriorityInversion(flat, newIndex) {
+      if (newIndex <= 0) return false;
+      const moved = flat[newIndex];
+      if (!moved || !moved.item || !moved.item.priority) return false;
+      const priorityOrder = { high: 0, medium: 1, low: 2 };
+      const movedRank = priorityOrder[moved.item.priority];
+      const prev = flat[newIndex - 1];
+      if (!prev || !prev.item) return false;
+      const prevRank =
+        prev.item.priority != null ? priorityOrder[prev.item.priority] ?? 3 : 3;
+      return movedRank < prevRank;
+    },
+    showToast(msg) {
+      if (this.toastTimer) clearTimeout(this.toastTimer);
+      this.toastMessage = msg;
+      this.toastVisible = true;
+      this.toastTimer = setTimeout(() => {
+        this.toastVisible = false;
+        this.toastTimer = null;
+      }, 2500);
+    },
     onDragEnd(evt) {
       this.drag = false;
       const flat = this.dragList;
       const movedEntry = flat[evt.newIndex];
+
+      if (this.hasPriorityInversion(flat, evt.newIndex)) {
+        this.showToast("高优先级项目不能拖到低优先级项目下方");
+        this.getTodoList();
+        return;
+      }
+
       const baseDepth = movedEntry._depth;
       const descendants = [];
       const start =
@@ -422,6 +467,8 @@ export default {
         }
       }
       DB.set("todoList", this.todoList);
+      this.pushUndo({ type: "drag", snapshot: this.dragUndoSnapshot });
+      this.dragUndoSnapshot = null;
       this.syncDragList();
       this.$nextTick(() => {
         if (movedEntry) {
@@ -437,19 +484,25 @@ export default {
     reassignSortOrders() {
       if (!this.todoList) return;
       const priorityOrder = { high: 0, medium: 1, low: 2 };
-      const groupKey = t =>
-        t.priority != null ? priorityOrder[t.priority] ?? 3 : 3;
-      const groups = {};
-      for (const t of this.todoList) {
-        const key = groupKey(t);
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(t);
-      }
-      for (const key in groups) {
-        groups[key].forEach((t, idx) => {
-          this.$set(t, "sortOrder", idx);
-        });
-      }
+      const assign = items => {
+        const groups = {};
+        for (const t of items) {
+          const key = t.priority != null ? priorityOrder[t.priority] ?? 3 : 3;
+          if (!groups[key]) groups[key] = [];
+          groups[key].push(t);
+        }
+        for (const key in groups) {
+          groups[key].forEach((t, idx) => {
+            this.$set(t, "sortOrder", idx);
+          });
+        }
+        for (const item of items) {
+          if (item.children && item.children.length) {
+            assign(item.children);
+          }
+        }
+      };
+      assign(this.todoList);
     },
     priorityBaseColor(todo) {
       if (!todo || !todo.priority) return null;
@@ -546,14 +599,8 @@ export default {
     applyPriority(todo, priority) {
       if (!todo) return;
       const oldColor = todo.color;
-      this.$set(todo, "priority", priority);
-      this.$set(todo, "sortOrder", null);
-      if (priority) {
-        this.$set(todo, "color", DEFAULT_PRIORITY_COLORS[priority]);
-      } else {
-        this.$set(todo, "color", COLOR_NONE);
-      }
-      const newColor = todo.color;
+      const oldPriority = todo.priority;
+      const changedChildren = [];
       if (todo.children && todo.children.length) {
         const allSameAsOld = todo.children.every(child => {
           const childColor = child.color || null;
@@ -562,12 +609,30 @@ export default {
         });
         if (allSameAsOld) {
           for (const child of todo.children) {
-            this.$set(child, "color", newColor);
-            this.$set(child, "priority", priority);
-            this.$set(child, "sortOrder", null);
+            changedChildren.push({ id: child.id, oldColor: child.color });
           }
         }
       }
+      this.$set(todo, "priority", priority);
+      this.$set(todo, "sortOrder", null);
+      if (priority) {
+        this.$set(todo, "color", DEFAULT_PRIORITY_COLORS[priority]);
+      } else {
+        this.$set(todo, "color", COLOR_NONE);
+      }
+      if (changedChildren.length) {
+        const newColor = todo.color;
+        for (const child of todo.children) {
+          this.$set(child, "color", newColor);
+        }
+      }
+      this.pushUndo({
+        type: "priority",
+        itemId: todo.id,
+        oldPriority,
+        oldColor,
+        changedChildren
+      });
       this.priorityPickerId = "";
       this.persistTodoList();
     },
@@ -586,7 +651,7 @@ export default {
     applyColor(todo, color) {
       if (!todo) return;
       const oldColor = todo.color;
-      this.$set(todo, "color", color);
+      const changedChildren = [];
       if (todo.children && todo.children.length) {
         const allSameAsOld = todo.children.every(child => {
           const childColor = child.color || null;
@@ -595,10 +660,22 @@ export default {
         });
         if (allSameAsOld) {
           for (const child of todo.children) {
-            this.$set(child, "color", color);
+            changedChildren.push({ id: child.id, oldColor: child.color });
           }
         }
       }
+      this.$set(todo, "color", color);
+      if (changedChildren.length) {
+        for (const child of todo.children) {
+          this.$set(child, "color", color);
+        }
+      }
+      this.pushUndo({
+        type: "color",
+        itemId: todo.id,
+        oldColor,
+        changedChildren
+      });
       this.colorPickerId = "";
       this.priorityPickerId = "";
       this.persistTodoList();
@@ -709,16 +786,21 @@ export default {
       }
       return null;
     },
-    findAndRemoveFromTree(items, id) {
+    findAndRemoveFromTree(items, id, parentId) {
       const index = items.findIndex(t => t.id === id);
       if (index !== -1) {
         const removedItem = items[index];
         items.splice(index, 1);
-        return { parentArray: items, index, removedItem };
+        return {
+          parentArray: items,
+          index,
+          removedItem,
+          parentId: parentId || null
+        };
       }
       for (const item of items) {
         if (item.children && item.children.length) {
-          const result = this.findAndRemoveFromTree(item.children, id);
+          const result = this.findAndRemoveFromTree(item.children, id, item.id);
           if (result) return result;
         }
       }
@@ -812,7 +894,8 @@ export default {
       this.pushUndo({
         type: "remove",
         item: DB.deepClone(result.removedItem),
-        index: result.index
+        parentId: result.parentId,
+        childIndex: result.index
       });
       this.editId = "";
       this.colorPickerId = "";
@@ -821,8 +904,13 @@ export default {
       this.$nextTick(() => this.syncDragList());
     },
     done(event, todo) {
-      if (this.editId) {
-        return;
+      if (this.editId && this.editId !== todo.id) {
+        this.edited();
+      }
+      if (this.editId === todo.id) {
+        this.editId = "";
+        this.colorPickerId = "";
+        this.priorityPickerId = "";
       }
       this.dblclick = true;
       setTimeout(() => {
@@ -833,7 +921,13 @@ export default {
 
       const parent = this.findParentInTree(this.todoList, todo.id);
       if (parent) {
+        const prevState = todo.isChildDone;
         this.$set(todo, "isChildDone", !todo.isChildDone);
+        this.pushUndo({
+          type: "child_done",
+          itemId: todo.id,
+          prevState: prevState
+        });
         DB.set("todoList", this.todoList);
         return;
       }
@@ -861,28 +955,20 @@ export default {
     },
     cascadeDone(todo) {
       if (!todo || !todo.id) return;
-      const itemsToDone = [];
-      const collect = node => {
-        itemsToDone.push(
-          Object.assign(
-            { done_date: getNowDate(), done_datetime: getNowDateTime() },
-            DB.deepClone(node)
-          )
-        );
-        if (node.children && node.children.length) {
-          node.children.forEach(child => collect(child));
-        }
-      };
-      collect(todo);
-      itemsToDone.forEach(item => DB.insert("doneList", item));
+      const doneItem = Object.assign(
+        { done_date: getNowDate(), done_datetime: getNowDateTime() },
+        DB.deepClone(todo)
+      );
+      DB.insert("doneList", doneItem);
       this.pushUndo({
         type: "cascade_done",
-        items: itemsToDone,
+        items: [doneItem],
         parentId: todo.id
       });
       const result = this.findAndRemoveFromTree(this.todoList, todo.id);
       if (result) {
         DB.set("todoList", this.todoList);
+        EventBus.$emit("refresh-done");
         this.$nextTick(() => this.syncDragList());
       }
     },
@@ -906,6 +992,25 @@ export default {
           if (!hasReal && item.children.every(c => !c.content)) {
             item.children = [];
           }
+        }
+      }
+    },
+    sortChildrenRecursive(items) {
+      if (!items || !items.length) return;
+      const priorityOrder = { high: 0, medium: 1, low: 2 };
+      items.sort((a, b) => {
+        const rankA = a.priority != null ? priorityOrder[a.priority] ?? 3 : 3;
+        const rankB = b.priority != null ? priorityOrder[b.priority] ?? 3 : 3;
+        if (rankA !== rankB) return rankA - rankB;
+        if (a.sortOrder != null && b.sortOrder != null)
+          return a.sortOrder - b.sortOrder;
+        if (a.sortOrder != null) return -1;
+        if (b.sortOrder != null) return 1;
+        return new Date(a.todo_datetime) - new Date(b.todo_datetime);
+      });
+      for (const item of items) {
+        if (item.children && item.children.length) {
+          this.sortChildrenRecursive(item.children);
         }
       }
     },
@@ -980,9 +1085,60 @@ export default {
         EventBus.$emit("refresh-done");
         this.$nextTick(() => this.syncDragList());
       } else if (action.type === "remove") {
-        this.todoList.push(DB.deepClone(action.item));
+        const restored = DB.deepClone(action.item);
+        if (action.parentId) {
+          const parent = this.findInTree(this.todoList, action.parentId);
+          if (parent) {
+            if (!Array.isArray(parent.children)) {
+              this.$set(parent, "children", []);
+            }
+            parent.children.splice(action.childIndex, 0, restored);
+          } else {
+            this.todoList.push(restored);
+          }
+        } else {
+          this.todoList.push(restored);
+        }
         DB.set("todoList", this.todoList);
         this.$nextTick(() => this.syncDragList());
+      } else if (action.type === "child_done") {
+        const target = this.findInTree(this.todoList, action.itemId);
+        if (target) {
+          this.$set(target, "isChildDone", action.prevState);
+          DB.set("todoList", this.todoList);
+          this.$nextTick(() => this.syncDragList());
+        }
+      } else if (action.type === "drag") {
+        this.todoList = DB.deepClone(action.snapshot);
+        DB.set("todoList", this.todoList);
+        this.$nextTick(() => this.syncDragList());
+      } else if (action.type === "color") {
+        const target = this.findInTree(this.todoList, action.itemId);
+        if (target) {
+          this.$set(target, "color", action.oldColor);
+          for (const childInfo of action.changedChildren) {
+            const child = this.findInTree(this.todoList, childInfo.id);
+            if (child) {
+              this.$set(child, "color", childInfo.oldColor);
+            }
+          }
+          DB.set("todoList", this.todoList);
+          this.$nextTick(() => this.syncDragList());
+        }
+      } else if (action.type === "priority") {
+        const target = this.findInTree(this.todoList, action.itemId);
+        if (target) {
+          this.$set(target, "priority", action.oldPriority);
+          this.$set(target, "color", action.oldColor);
+          for (const childInfo of action.changedChildren) {
+            const child = this.findInTree(this.todoList, childInfo.id);
+            if (child) {
+              this.$set(child, "color", childInfo.oldColor);
+            }
+          }
+          DB.set("todoList", this.todoList);
+          this.$nextTick(() => this.syncDragList());
+        }
       }
     },
     onDocClick(e) {
@@ -1281,11 +1437,6 @@ export default {
           line-height: 28px;
         }
       }
-      .child-collapse-spacer {
-        flex-shrink: 0;
-        width: 14px;
-        display: inline-block;
-      }
       .item-body {
         flex: 1;
         display: flex;
@@ -1510,5 +1661,43 @@ export default {
 }
 .ghost {
   opacity: 0.5;
+}
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.95),
+    rgba(239, 68, 68, 0.95)
+  );
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 99999;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.toast-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.toast-msg {
+  font-weight: 500;
+}
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition: all 0.25s ease;
+}
+.toast-fade-enter,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(10px);
 }
 </style>

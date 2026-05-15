@@ -335,10 +335,41 @@ const DB = {
           id: generateUUID(),
           todo_date: getNowDate(),
           todo_datetime: getNowDateTime(),
-          content: "📋 级联操作：完成/删除父项目时，自动处理所有子项目",
+          content: "📋 测试：多级子项目级联操作（双击我完成整棵树）",
           priority: "medium",
-          color: null,
-          children: []
+          color: "#f59e0b",
+          collapsed: false,
+          children: [
+            {
+              id: generateUUID(),
+              todo_date: getNowDate(),
+              todo_datetime: getNowDateTime(),
+              content: "第一级子项目 A — 双击标记完成（可 Ctrl+Z 撤销）",
+              priority: null,
+              color: "#f59e0b",
+              collapsed: false,
+              children: [
+                {
+                  id: generateUUID(),
+                  todo_date: getNowDate(),
+                  todo_datetime: getNowDateTime(),
+                  content: "第二级子项目 A-1 — 双击父项目会一同移至 Done",
+                  priority: null,
+                  color: "#f59e0b",
+                  children: []
+                }
+              ]
+            },
+            {
+              id: generateUUID(),
+              todo_date: getNowDate(),
+              todo_datetime: getNowDateTime(),
+              content: "第一级子项目 B — 可独立标记完成，不联动父项目",
+              priority: null,
+              color: "#f59e0b",
+              children: []
+            }
+          ]
         },
         {
           id: generateUUID(),
@@ -357,18 +388,39 @@ const DB = {
           done_datetime: getNowDateTime(),
           todo_date: getNowDate(),
           todo_datetime: getNowDateTime(),
-          content: "✨ 双击项目标记完成，会移到这里",
+          content: "✨ 双击项目标记完成，会移到这里（含子项目的可点恢复测试）",
           id: generateUUID(),
           priority: null,
           color: "#8b5cf6",
-          children: []
+          collapsed: false,
+          children: [
+            {
+              id: generateUUID(),
+              todo_date: getNowDate(),
+              todo_datetime: getNowDateTime(),
+              content: "已完成的子项目 — 恢复父项目时会一同恢复",
+              priority: null,
+              color: "#8b5cf6",
+              children: [
+                {
+                  id: generateUUID(),
+                  todo_date: getNowDate(),
+                  todo_datetime: getNowDateTime(),
+                  content: "更深层子项目 — 验证整棵树恢复与 Ctrl+Z 撤销",
+                  priority: null,
+                  color: "#8b5cf6",
+                  children: []
+                }
+              ]
+            }
+          ]
         },
         {
           done_date: getNowDate(),
           done_datetime: getNowDateTime(),
           todo_date: getNowDate(),
           todo_datetime: getNowDateTime(),
-          content: "【重要】给爱你的人轻声道谢",
+          content: "【测试】给爱你的人轻声道谢 — 验证删除后 Ctrl+Z 恢复",
           id: "272aa857-bd53-44fb-b6fc-49d4ef595ade",
           priority: null,
           color: null,

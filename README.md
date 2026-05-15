@@ -1,20 +1,19 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Electron-11.x-47848F?logo=electron&logoColor=white" alt="Electron">
   <img src="https://img.shields.io/badge/Vue-2.6-4FC08D?logo=vue.js&logoColor=white" alt="Vue">
-  <img src="https://img.shields.io/badge/version-1.1.0-blue.svg" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.1.1-blue.svg" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License">
 </p>
 
 <h1 align="center">todo-list · 旺财定制版</h1>
 
 <p align="center">
-  <strong>定制的 Electron 桌面待办应用 —— 多级子项目 · 智能搜索 · 跨路由撤销 · 层级独立配置</strong>
+  <strong>深度定制的 Electron 桌面待办应用 —— 多级子项目 · 智能搜索 · 跨路由撤销 · 层级独立配置</strong>
 </p>
 
 <p align="center">
-  <sub>基于 <a href="https://github.com/xiajingren/xhznl-todo-list">xhznl-todo-list</a> by <a href="https://github.com/xiajingren">@xiajingren</a> 定制开发</sub>
+  <sub>基于 <a href="https://github.com/xiajingren/xhznl-todo-list">xhznl-todo-list</a> by <a href="https://github.com/xiajingren">@xiajingren</a> 深度定制开发</sub>
 </p>
-
 
 <p align="center">
   <sub>定制开发者：<a href="https://github.com/WangCai-1227">@WangCai-1227</a></sub>
@@ -88,7 +87,7 @@
 
 ### Todo列表
 
-
+<br />
 
 ![主界面](主界面.PNG)
 
@@ -98,11 +97,9 @@
 
 ### 设置面板
 
-![](设置1.PNG)
-
-![](设置界面.PNG)
-
 ![线宽和子项目编号设置](线宽和子项目编号设置.PNG)
+
+![设置界面](设置界面.PNG "设置界面")
 
 ***
 
@@ -270,68 +267,7 @@ npm run electron:build
 | `Ctrl+Shift+↓` | 展开全部        |
 | `Ctrl+Shift+↑` | 折叠全部        |
 
-***
 
-## ⚙️ 设置项说明
-
-打开设置面板（⚙ 图标），包含以下配置区块：
-
-### 窗口外观（1.1.0 新增 ⭐）
-
-| 配置    | 默认值  | 说明           |
-| ----- | ---- | ------------ |
-| 窗口透明度 | 65%  | 窗口背景透明度调节    |
-| 背景颜色  | 黑色   | 窗口背景颜色选择（纯色） |
-| 背景强度  | 100% | 背景颜色显示强度     |
-
-### 标题自定义（1.1.0 新增 ⭐）
-
-| 配置   | 默认值       | 说明         |
-| ---- | --------- | ---------- |
-| 左侧标题 | todo-list | 窗口左上角显示的文字 |
-| 右侧标题 | 旺财定制版     | 窗口右上角显示的文字 |
-
-### 超链接（1.1.0 新增 ⭐）
-
-| 配置    | 默认值   | 说明                 |
-| ----- | ----- | ------------------ |
-| 超链接间距 | 8px   | "by 旺财"超链接与右侧标题的间距 |
-| 超链接文字 | by 旺财 | 蓝色斜体超链接，点击打开浏览器    |
-
-### 显示
-
-| 配置   | 说明        |
-| ---- | --------- |
-| 显示编号 | 主项目编号显示开关 |
-
-### 格式
-
-> 18 种编号格式选择，应用于主项目
-
-### 间距
-
-| 配置   | 默认值 | 说明      |
-| ---- | --- | ------- |
-| 编号间距 | 6px | 编号与正文间距 |
-
-### 子项目（每级独立配置）⭐
-
-| 配置       | 默认值                    | 说明           |
-| -------- | ---------------------- | ------------ |
-| 显示子项目编号  | 开启                     | 子项目编号显示开关    |
-| **字号**   | 16px                   | 该级子项目字体大小    |
-| **编号间距** | 6px                    | 该级编号与正文间距    |
-| **缩进**   | 18px                   | 该级行左缩进（多级累加） |
-| **编号**   | 一级：阿拉伯 / 二级：字母 / 三级：符号 | 该级编号格式       |
-
-### 完成划线
-
-| 配置   | 默认值 | 说明            |
-| ---- | --- | ------------- |
-| 线宽   | 1px | 删除线粗细         |
-| 颜色预设 | 自动  | 跟随项目颜色，或指定固定色 |
-
-> 所有配置**实时保存**，重启后保持。
 
 ***
 
@@ -410,30 +346,6 @@ dist_electron/
 
 > Windows 下 `userData` 通常为 `%APPDATA%/todo-list`
 
-***
-
-## 📊 与原版差异对比
-
-| 功能模块              | 原版 xhznl-todo-list |      旺财定制版     |
-| :---------------- | :----------------: | :------------: |
-| 基础待办 CRUD         |          ✅         |        ✅       |
-| 编号格式自定义           |          ✅         |   ✅ (扩展至18种)   |
-| 🌳 多级子项目          |          ❌         |    ✅ **新增**    |
-| 🔄 子项目拖拽重组        |          ❌         |    ✅ **新增**    |
-| ↩️ 跨路由撤销          |          ❌         |    ✅ **新增**    |
-| 🔍 智能搜索+自动展开      |          ❌         |    ✅ **新增**    |
-| 📋 级联完成/删除/恢复     |          ❌         |    ✅ **新增**    |
-| 🎯 智能颜色继承         |          ❌         |    ✅ **新增**    |
-| ⚙️ 层级独立配置         |          ❌         |    ✅ **新增**    |
-| ✏️ 连续删除线          |          ❌         |    ✅ **新增**    |
-| 📊 **Excel 导出导入** |          ❌         | ✅ **1.1.0 新增** |
-| 📨 EventBus 跨页通信  |          ❌         |    ✅ **新增**    |
-| ✏️ **标题自定义**      |          ❌         | ✅ **1.1.0 新增** |
-| 🎨 **背景色与透明度**    |          ❌         | ✅ **1.1.0 新增** |
-| 🖱️ **拖拽排序优先级**   |          ❌         | ✅ **1.1.0 新增** |
-
-***
-
 ## 🙏 致谢
 
 感谢 [xiajingren](https://github.com/xiajingren) 创建了优秀的 [xhznl-todo-list](https://github.com/xiajingren/xhznl-todo-list) 项目，本项目在此基础上进行拓展开发。
@@ -457,7 +369,15 @@ dist_electron/
 
 ## 📜 版本更新记录
 
-### v1.1.0（当前版本）
+### v1.1.1（当前版本）
+
+> 基于 v1.1.0 迭代更新
+
+- 🔧 修复 Ctrl+Z 无法撤回子项目完成的 bug，并加入支持多种操作
+- 🔧   实装了子项目优先级与用户拖拽排序无效的bug
+- ✨ 优化了双击完成项目的使用体验
+
+### v1.1.0
 
 > 基于 v1.0.0 迭代更新
 
@@ -477,7 +397,7 @@ dist_electron/
 
 ### v1.0.0
 
-> 首个定制版本，基于 [xhznl-todo-list](https://github.com/xiajingren/xhznl-todo-list) 定制
+> 首个定制版本，基于 [xhznl-todo-list](https://github.com/xiajingren/xhznl-todo-list) 深度定制
 
 **新增功能**
 
